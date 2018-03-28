@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
 * Студент: [Kate M](https://up.htmlacademy.ru/javascript/13/user/70920).
-* Наставник: `Неизвестно`.
+* Наставник: `Без наставника`.
 
 ---
 
