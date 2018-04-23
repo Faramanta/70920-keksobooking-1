@@ -8,6 +8,9 @@ var FEATURES = ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditio
 var PHOTOS = ['http://o0.github.io/assets/images/tokyo/hotel1.jpg', 'http://o0.github.io/assets/images/tokyo/hotel2.jpg', 'http://o0.github.io/assets/images/tokyo/hotel3.jpg'];
 var userNum = ['01', '02', '03', '04', '05', '06', '07', '08'];
 
+var mainForm = document.querySelector('.ad-form');
+var fieldsets = mainForm.querySelectorAll('fieldset');
+
 // генерация случайного числа из диапазона
 function getRandomRangeNum(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
@@ -88,26 +91,10 @@ var getFlatType = function (type) {
   return flatType;
 };
 
+var mapPins = document.querySelector('.map__pins');
+var similarPin = document.querySelector('template').content.querySelector('.map__pin');
+var fragment = document.createDocumentFragment();
 
-// Отрисовка метки
-var renderPins = function (pins) {
-  var mapPins = document.querySelector('.map__pins');
-  var similarPin = document.querySelector('template').content.querySelector('.map__pin');
-  var fragment = document.createDocumentFragment();
-
-  for (i = 0; i < TOTAL_OFFERS; i++) {
-    var pinElement = similarPin.cloneNode(true);
-    var pinImg = pinElement.querySelector('img');
-    pinElement.style.top = pins[i].location.y + 'px';
-    pinElement.style.left = pins[i].location.x + 'px';
-    pinImg.src = pins[i].author.avatar;
-    fragment.appendChild(pinElement);
-  }
-  mapPins.appendChild(fragment);
-};
-
-// отрисовываем метки на карте
-renderPins(offers);
 
 // удобства
 var renderFeatures = function () {
@@ -136,34 +123,96 @@ var renderPhotos = function () {
 };
 
 // Отрисовка объявления
-var renderCards = function () {
+var renderCards = function (card) {
   var cardTemplate = document.querySelector('template').content.querySelector('.map__card');
   var cardElement = cardTemplate.cloneNode(true);
   var features = cardElement.querySelector('.popup__features');
   var photos = cardElement.querySelector('.popup__photos');
-  cardElement.querySelector('.popup__title').textContent = offers[0].offer.title;
-  cardElement.querySelector('.popup__text--address').textContent = offers[0].offer.address;
-  cardElement.querySelector('.popup__text--price').textContent = offers[0].offer.price + ' ₽/ночь';
-  cardElement.querySelector('.popup__type').textContent = getFlatType(offers[0].offer.type);
-  cardElement.querySelector('.popup__text--capacity').textContent = offers[0].offer.rooms + ' комнаты для ' + offers[0].offer.guests + ' гостей';
-  cardElement.querySelector('.popup__text--time').textContent = 'Заезд после ' + offers[0].offer.checkin + ', выезд до ' + offers[0].offer.checkout;
-  cardElement.querySelector('.popup__description').textContent = offers[0].offer.description;
+  cardElement.querySelector('.popup__title').textContent = card.offer.title;
+  cardElement.querySelector('.popup__text--address').textContent = card.offer.address;
+  cardElement.querySelector('.popup__text--price').textContent = card.offer.price + ' ₽/ночь';
+  cardElement.querySelector('.popup__type').textContent = getFlatType(card.offer.type);
+  cardElement.querySelector('.popup__text--capacity').textContent = card.offer.rooms + ' комнаты для ' + card.offer.guests + ' гостей';
+  cardElement.querySelector('.popup__text--time').textContent = 'Заезд после ' + card.offer.checkin + ', выезд до ' + card.offer.checkout;
+  cardElement.querySelector('.popup__description').textContent = card.offer.description;
   features.innerHTML = '';
   cardElement.querySelector('.popup__features').appendChild(renderFeatures());
   photos.innerHTML = '';
   cardElement.querySelector('.popup__photos').appendChild(renderPhotos());
-  cardElement.querySelector('.popup__avatar').src = offers[0].author.avatar;
+  cardElement.querySelector('.popup__avatar').src = card.author.avatar;
   return cardElement;
 };
 
-var showCard = function () {
+var showCard = function (card) {
   var offerFragment = document.createDocumentFragment();
   var beforeBlock = document.querySelector('.map__filters-container');
-  offerFragment.appendChild(renderCards(offers));
+  offerFragment.appendChild(renderCards(card));
   document.querySelector('.map').insertBefore(offerFragment, beforeBlock);
-
 };
 
-showCard(offers);
+// Отрисовка метки
+var renderPins = function (pins) {
+  var pinElement = similarPin.cloneNode(true);
+  var pinImg = pinElement.querySelector('img');
+  pinElement.style.top = pins.location.y + 'px';
+  pinElement.style.left = pins.location.x + 'px';
+  pinImg.src = pins.author.avatar;
+  fragment.appendChild(pinElement);
+  pinElement.addEventListener('click', function () {
+    if (document.querySelector('.map__card')) {
+      closeCards();
+    }
+    showCard(pins);
+    var closeCardBtn = document.querySelector('.popup__close');
+    closeCardBtn.addEventListener('click', function () {
+      closeCards();
+    });
+  });
+  mapPins.appendChild(fragment);
+};
 
-document.querySelector('.map').classList.remove('map--faded');
+var closeCards = function () {
+  var popup = document.querySelector('.map__card');
+  if (popup) {
+    document.querySelector('.map').removeChild(document.querySelector('.map__card'));
+  }
+};
+
+// module4-task1 ==========================================================================================
+
+// Деактивируем форму
+// var disabledForm = function () {
+for (i = 0; i < fieldsets.length; i++) {
+  fieldsets[i].setAttribute('disabled', 'disabled');
+}
+// };
+
+// активируем форму
+var activatedForm = function () {
+  document.querySelector('.map').classList.remove('map--faded');
+  mainForm.classList.remove('ad-form--disabled');
+  for (i = 0; i < fieldsets.length; i++) {
+    fieldsets[i].removeAttribute('disabled', 'disabled');
+  }
+};
+
+var pinMain = document.querySelector('.map__pin--main');
+var PIN_WIDTH = pinMain.clientWidth;
+var PIN_HEIGHT = pinMain.clientHeight;
+
+// Расчет координат метки
+var setAddress = function () {
+  var pinCoordX = Math.floor(pinMain.offsetTop / 2 + PIN_WIDTH / 2);
+  var pinCoordY = Math.floor(pinMain.offsetLeft / 2 + PIN_HEIGHT / 2);
+  document.querySelector('#address').value = pinCoordX + ', ' + pinCoordY;
+};
+
+// клик по метке
+pinMain.addEventListener('mouseup', function () {
+  activatedForm();
+  setAddress();
+  for (i = 0; i < TOTAL_OFFERS; i++) {
+    renderPins(offers[i]);
+  }
+});
+
