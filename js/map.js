@@ -167,6 +167,11 @@ var renderPins = function (pins) {
     closeCardBtn.addEventListener('click', function () {
       closeCards();
     });
+    document.addEventListener('keydown', function (evt) {
+      if (evt.keyCode === 27) {
+        document.querySelector('.map').removeChild(document.querySelector('.map__card'));
+      }
+    });
   });
   mapPins.appendChild(fragment);
 };
@@ -216,3 +221,7 @@ pinMain.addEventListener('mouseup', function () {
   }
 });
 
+
+
+
+// Закрытие попапа по esc - 4.4 !!!
