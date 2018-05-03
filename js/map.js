@@ -221,7 +221,70 @@ pinMain.addEventListener('mouseup', function () {
   }
 });
 
+// module4-task2 ==========================================================================================
+
+// Зависимость цены за ночь от типа
+var typeRoom = mainForm.elements.type;
+var priceRoom = mainForm.elements.price;
+
+typeRoom.addEventListener('change', function () {
+  switch (typeRoom.value) {
+    case 'bungalo':
+      priceRoom.min = 0;
+      priceRoom.placeholder = 'от 0';
+      break;
+
+    case 'flat':
+      priceRoom.min = 1000;
+      priceRoom.placeholder = 'от 1000';
+      break;
+
+    case 'house':
+      priceRoom.min = 5000;
+      priceRoom.placeholder = 'от 5000';
+      break;
+
+    case 'palace':
+      priceRoom.min = 10000;
+      priceRoom.placeholder = 'от 10000';
+  }
+});
+
+// Синхронизация времени заезда и выезда
+var timeIn = mainForm.elements.timein;
+var timeOut = mainForm.elements.timeout;
+
+var timeInOut = function (e) {
+  var target = e.target;
+  timeIn.value = target.value;
+  timeOut.value = target.value;
+};
+
+var timeEl = mainForm.querySelector('.ad-form__element--time');
+timeEl.addEventListener('change', timeInOut);
+
+// Синхронизация количества комнат и гостей
+
+var roomNum = mainForm.elements.rooms;
+var guestCount = mainForm.elements.capacity;
+var checkRoomGuest = function () {
+
+  var roomValue = mainForm.elements.rooms.options[roomNum.selectedIndex].value;
+
+  var guestValue = mainForm.elements.capacity.options[guestCount.selectedIndex].value;
+  if (roomValue === '1' && guestValue !== '1') {
+    guestCount.setCustomValidity('Только для 1 гостя');
+  } else if (roomValue === '2' && guestValue !== '1' && guestValue !== '2') {
+    guestCount.setCustomValidity('Только для 1 или 2 гостей');
+  } else if (roomValue === '3' && guestValue !== '1' && guestValue !== '2' && guestValue !== '3') {
+    guestCount.setCustomValidity('Только для 1, 2 или 3 гостей');
+  } else if (roomValue === '100') {
+    guestCount.setCustomValidity('Не для гостей');
+  } else {
+    guestCount.setCustomValidity('');
+  }
+};
 
 
-
-// Закрытие попапа по esc - 4.4 !!!
+roomNum.addEventListener('change', checkRoomGuest);
+guestCount.addEventListener('change', checkRoomGuest);
