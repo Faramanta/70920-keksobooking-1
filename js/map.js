@@ -204,22 +204,23 @@ var activatedForm = function () {
 var pinMain = document.querySelector('.map__pin--main');
 var PIN_WIDTH = pinMain.clientWidth;
 var PIN_HEIGHT = pinMain.clientHeight;
+var MAP_HEIGHT = 750;
+var MAP_WIDTH = 1200;
 
 // Расчет координат метки
-var setAddress = function () {
-  var pinCoordX = Math.floor(pinMain.offsetTop / 2 + PIN_WIDTH / 2);
-  var pinCoordY = Math.floor(pinMain.offsetLeft / 2 + PIN_HEIGHT / 2);
+// var setAddress = function () {
+  var pinCoordX = Math.floor(MAP_WIDTH / 2 - PIN_WIDTH / 2);
+  var pinCoordY = Math.floor(MAP_HEIGHT / 2 - PIN_HEIGHT / 2);
   document.querySelector('#address').value = pinCoordX + ', ' + pinCoordY;
-};
-
-// клик по метке
+// };
 pinMain.addEventListener('mouseup', function () {
   activatedForm();
-  setAddress();
+  // setAddress();
   for (i = 0; i < TOTAL_OFFERS; i++) {
     renderPins(offers[i]);
   }
 });
+
 
 // module4-task2 ==========================================================================================
 
@@ -288,3 +289,73 @@ var checkRoomGuest = function () {
 
 roomNum.addEventListener('change', checkRoomGuest);
 guestCount.addEventListener('change', checkRoomGuest);
+
+// module5-task1 ==========================================================================================
+
+
+// клик по метке
+
+pinMain.addEventListener('mousedown', function (evt) {
+  evt.preventDefault();
+
+  var LEFT_EDGE_MAP = 0;
+  var RIGHT_EDGE_MAP = 1200;
+  var TOP_EDGE_MAP = 0;
+  var BOTTOM_EDGE_MAP = 704;
+
+  var startCoords = {
+    x: evt.clientX,
+    y: evt.clientY
+  };
+
+
+  var onPinMainMousemove = function (moveEvt) {
+    moveEvt.preventDefault();
+
+    var shift = {
+      x: startCoords.x - moveEvt.clientX,
+      y: startCoords.y - moveEvt.clientY
+    };
+
+    startCoords = {
+      x: moveEvt.clientX,
+      y: moveEvt.clientY
+    };
+
+    var pinMainX = pinMain.offsetLeft - shift.x;
+    var pinMainY = pinMain.offsetTop - shift.y;
+
+    if (pinMainX < LEFT_EDGE_MAP) {
+      pinMain.style.left = '0px';
+    } else if (pinMainX >= RIGHT_EDGE_MAP - 62) {
+      pinMain.style.left = '1138px';
+    } else {
+      pinMain.style.left = pinMainX + 'px';
+    }
+
+
+    if (pinMainY < TOP_EDGE_MAP) {
+      pinMain.style.top = '0px';
+    } else if (pinMainY >= BOTTOM_EDGE_MAP - 84) {
+      pinMain.style.top = '620px';
+    } else {
+      pinMain.style.top = pinMainY + 'px';
+    }
+    document.querySelector('#address').value = (pinMainX + 6) + ', ' + (pinMainY + 10);
+  };
+
+  var onPinMainMouseup = function (upEvt) {
+    upEvt.preventDefault();
+
+    document.removeEventListener('mousemove', onPinMainMousemove);
+    document.removeEventListener('mouseup', onPinMainMouseup);
+  };
+
+  document.addEventListener('mousemove', onPinMainMousemove);
+  document.addEventListener('mouseup', onPinMainMouseup);
+
+
+});
+
+
+// pinMain.addEventListener('mouseup', onPinMainMouseup);
